@@ -1,0 +1,92 @@
+{
+  "name": "language translator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "e63b6168-2f2a-4ad0-ad35-83ff01643aba",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        -32
+      ],
+      "id": "8680d116-e9eb-4079-a7dd-a2b8ede1ef9d",
+      "name": "Webhook",
+      "webhookId": "e63b6168-2f2a-4ad0-ad35-83ff01643aba"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\"Translate the given text into the selected language (Telugu or Hindi).\nSend the text to the correct n8n webhook and return only the translated output.\n translation.\"\n\ntext :- {{ $json.body.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        16,
+        -32
+      ],
+      "id": "0ba7c3e3-5f21-48dd-9732-cc1b7f020952",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        160
+      ],
+      "id": "c006e67f-7a1b-4aa2-9ec6-4ba400194ca5",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "JYPrU4SyqhEYTqYz",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a019cddf-1658-467b-baa1-632bb1fae2f1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4eba01caeb5b4eb6f6ca563f399f4ecc9162a65eb2ab80829efe809cf1413ffc"
+  },
+  "id": "LMezg2FGanIoPBFq",
+  "tags": []
+}

@@ -1,0 +1,374 @@
+{
+  "name": "task-1 monthly assessment marks",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "student_marks_form",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Student Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "course",
+              "fieldType": "radio",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Data Analytics"
+                  },
+                  {
+                    "option": "Data Science"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        16,
+        0
+      ],
+      "id": "59fabd76-d090-402c-ac03-b2e09fb46c12",
+      "name": "student marks analysis",
+      "webhookId": "3f9beac1-e54e-455d-acca-d99c805e1485"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "233ae8b1-9c0a-4c34-a197-f4e540053773",
+              "name": "average",
+              "value": "={{ $json.average }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1312,
+        -160
+      ],
+      "id": "ee01c5f6-afd5-4023-8c84-f80883e6069f",
+      "name": "Eligible"
+    },
+    {
+      "parameters": {
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "python",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "EDA",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "SQL",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "PowerBI",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Statistics",
+              "fieldType": "number",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.3,
+      "position": [
+        464,
+        -112
+      ],
+      "id": "38a251c9-b2af-4a0e-8bd5-4217206ffce5",
+      "name": "DA",
+      "webhookId": "c076b48a-cc9e-475b-ac04-3af3bc46748d"
+    },
+    {
+      "parameters": {
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "ML",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "ANN",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "CNN",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "NLP",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "GenAI",
+              "fieldType": "number",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.3,
+      "position": [
+        480,
+        160
+      ],
+      "id": "7e3ef860-6e2f-43c1-9c35-0f0779df2fc7",
+      "name": "DS",
+      "webhookId": "0e79a0a6-d268-40cf-8f35-3280362e91bf"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst data = items[0].json;\n\n\nconst average = (\n  Number(data[\"python\"]) +\n  Number(data[\"EDA\"]) +\n  Number(data[\"SQL\"]) +\n  Number(data[\"PowerBI\"]) +\n  Number(data[\"Statistics\"])\n) / 5;\n\n\nreturn [{\n  json: {\n    ...data,\n    average: average\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -112
+      ],
+      "id": "3213f1b5-8889-4130-801b-fc77ecd07b75",
+      "name": "Average"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = items[0].json;\n\nconst average = (\n  Number(data[\"ML\"]) +\n  Number(data[\"ANN\"]) +\n  Number(data[\"CNN\"]) +\n  Number(data[\"NLP\"]) +\n  Number(data[\"GenAI\"])\n) / 5;\n\nreturn [{\n  json: {\n    ...data,\n    average: average\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        160
+      ],
+      "id": "b34fdc99-ba7a-4001-8be3-1ca7a99e08d0",
+      "name": "Average1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c2d5680d-642a-413d-b743-3700e63270d2",
+              "leftValue": "={{ $json.average }}",
+              "rightValue": 70,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "1fd85d6c-ddab-4307-8da8-3ec761e74362",
+      "name": ">70 or <70"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "747f2bf8-d0e2-468b-8eaf-a2866fb7d053",
+              "leftValue": "={{ $json.course }}",
+              "rightValue": "Data Analytics",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "3fbebf50-bef5-44d3-8d71-84bcbb923953",
+      "name": "DA or DS",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "233ae8b1-9c0a-4c34-a197-f4e540053773",
+              "name": "average",
+              "value": "={{ $json.average }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1328,
+        112
+      ],
+      "id": "31d5a005-bb1b-4252-ab21-2c7bf2d31364",
+      "name": "Not Eligible"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "student marks analysis": {
+      "main": [
+        [
+          {
+            "node": "DA or DS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DA": {
+      "main": [
+        [
+          {
+            "node": "Average",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DS": {
+      "main": [
+        [
+          {
+            "node": "Average1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Average": {
+      "main": [
+        [
+          {
+            "node": ">70 or <70",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Average1": {
+      "main": [
+        [
+          {
+            "node": ">70 or <70",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    ">70 or <70": {
+      "main": [
+        [
+          {
+            "node": "Eligible",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Not Eligible",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DA or DS": {
+      "main": [
+        [
+          {
+            "node": "DA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "DS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7db118f2-4603-44cb-8aff-36032162d807",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4eba01caeb5b4eb6f6ca563f399f4ecc9162a65eb2ab80829efe809cf1413ffc"
+  },
+  "id": "BLcmglEnTIVOkfD9",
+  "tags": []
+}

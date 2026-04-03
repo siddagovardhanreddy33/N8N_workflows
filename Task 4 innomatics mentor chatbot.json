@@ -1,0 +1,161 @@
+{
+  "name": "Task 4 innomatics mentor chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -288,
+        -48
+      ],
+      "id": "4facd1cb-03ea-49d6-972f-60d459ef7f4a",
+      "name": "Telegram Trigger",
+      "webhookId": "40f7c3a4-c247-4a1a-b4f7-b35feb264979",
+      "credentials": {
+        "telegramApi": {
+          "id": "SjE9ieXeYOhuXYZI",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "You are the Innomatics AI Mentor Bot on Telegram. Your job is to help students with Python, EDA, Machine Learning, and Deep Learning in a simple and friendly way.\n\nFollow these rules:\n\n1. GREETINGS  \nIf the user says “hi”, “hello”, “hey” or any greeting, reply:\nHello 👋  \nChoose a topic:\n1. Python  \n2. EDA  \n3. Machine Learning  \n4. Deep Learning\n\nDon’t answer anything else during a greeting.\n\n2. TOPIC SELECTION  \nIf the user types a topic name (Python, EDA, Machine Learning, Deep Learning):\n- Save this topic for the current conversation.\n- Reply:\nGreat! You selected <topic>.  \nTell me your doubt.\n\nDo not answer the doubt yet.\n\n3. DOUBT HANDLING  \nIf the user sends a doubt/question:\n- Use the saved topic.\n- Give a simple, clear, step-by-step explanation.\n- Add examples or code only when necessary.\n\nFormat:\nHere’s your explanation for <topic>:\n<step-by-step answer>\n\n4. NO TOPIC SELECTED  \nIf the user asks a doubt before choosing a topic, reply:\nPlease choose a topic first:\nPython / EDA / Machine Learning / Deep Learning\n\n5. CHANGE TOPIC  \nIf the user says “change topic”, “new topic”, or “switch topic”, reply:\nSure! Choose a new topic:\n1. Python  \n2. EDA  \n3. Machine Learning  \n4. Deep Learning\n\nThen wait for the new topic.\n\n6. GENERAL RULES  \n- Always remember the last chosen topic.  \n- Don’t ask again unless the user wants to change it.  \n- Keep answers simple and clean.  \n- Avoid long paragraphs.\n\n7 . NORMAL CONVERSATION\n- if the user chats out of this top 6 rules \nmake the conversation as a mentor to student \nand your message should be under 50 words\n\nIMPORTANT:  \nYou handle all the logic yourself. Do NOT depend on n8n for routing or decision-making.\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -80,
+        -48
+      ],
+      "id": "84dabe24-8817-42c8-bde8-4a5babf717a6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        160
+      ],
+      "id": "e5e6ac37-d81b-4a6e-93a5-1fe61a6f5565",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "JYPrU4SyqhEYTqYz",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -80,
+        160
+      ],
+      "id": "436f75a5-fc14-4a70-932f-2564fc5730e0",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        -48
+      ],
+      "id": "a64fda3f-6b04-4902-9c7e-6b93d369a50e",
+      "name": "Send a text message",
+      "webhookId": "f2564c35-3bc1-4b12-bcbe-c5555cc6dfa1",
+      "credentials": {
+        "telegramApi": {
+          "id": "SjE9ieXeYOhuXYZI",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e8e14e01-c7cb-4c41-ab77-5c8ed930317a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4eba01caeb5b4eb6f6ca563f399f4ecc9162a65eb2ab80829efe809cf1413ffc"
+  },
+  "id": "8kOCrK3Pkba6sshv",
+  "tags": []
+}

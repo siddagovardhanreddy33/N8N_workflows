@@ -1,0 +1,431 @@
+{
+  "name": "Task 2 Certificate Eligibility Generation using n8n",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5dc0f975-973a-4364-8140-9c1521c9da7c",
+              "leftValue": "={{ $json['Monthly assessment marks'] }}",
+              "rightValue": "={{ 80 }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "8dc43d7f-5efc-43f5-b3fe-ffc53bd57d0a",
+              "leftValue": "={{ $json['Quiz Marks'] }}",
+              "rightValue": 80,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "f6119e66-b6c2-43fe-b061-dda4c9406785",
+              "leftValue": "={{ $json['Total tasks completed'] }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "38288eef-9c29-4569-8af7-6612026244b4",
+              "leftValue": "={{ $json['Total assessment Completed'] }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "3e40937b-38d9-4ce4-98c8-079f094bb442",
+              "leftValue": "={{ $json['Project presentation completed'] }}",
+              "rightValue": "Yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -96,
+        -48
+      ],
+      "id": "015dbb1c-e9d1-448f-9fea-96e176ba8a06",
+      "name": "Gold condition"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0817675f-f369-4116-a64d-31af7d5ec3fe",
+              "leftValue": "={{ $json['Monthly assessment marks'] }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "1ef3290f-3a7c-4415-b124-ed2addcf9733",
+              "leftValue": "={{ $json['Quiz Marks'] }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "7cb9753c-e15c-4a73-acee-b6da62727946",
+              "leftValue": "={{ $json['Total tasks completed'] }}",
+              "rightValue": 9,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "61b1629c-17e2-4167-854e-b17f867ab6ca",
+              "leftValue": "={{ $json['Total assessment Completed'] }}",
+              "rightValue": 9,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "64daa180-b784-4198-8917-88ea7566f66e",
+              "leftValue": "={{ $json['Project presentation completed'] }}",
+              "rightValue": "Yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        112,
+        64
+      ],
+      "id": "7c68cbbd-d22d-403d-b29e-d9a2fdc62624",
+      "name": "silver condition"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e50b2c33-d7a9-48a8-8d9f-54e9edc21c0c",
+              "leftValue": "={{ $json['Monthly assessment marks'] }}",
+              "rightValue": 40,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "1920a564-e9a8-44ed-9f89-3952a28cc999",
+              "leftValue": "={{ $json['Quiz Marks'] }}",
+              "rightValue": 40,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "c5a3f99b-d465-4d0e-b44a-cb29076f40a1",
+              "leftValue": "={{ $json['Total tasks completed'] }}",
+              "rightValue": 8,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "d52c73e7-8dc0-4c0d-92bf-3ad393243928",
+              "leftValue": "={{ $json['Total assessment Completed'] }}",
+              "rightValue": 8,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "1d004bd0-31ce-4cd6-a2dc-456e0f6c5b9a",
+              "leftValue": "={{ $json['Project presentation completed'] }}",
+              "rightValue": "Yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        160
+      ],
+      "id": "b03c8ad1-c25b-4fd0-84e8-2baf0749ea2f",
+      "name": "bronze condition"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Email ID'] }}",
+        "subject": "Congratulations! You’re Eligible for the Gold Certificate",
+        "emailType": "text",
+        "message": "=Hello  {{ $json.Name }} ,  \n\n\nCongratulations! Based on your outstanding performance,  \nyou are eligible for the **Gold Certificate**.  \nKeep up the great work and continue shining! ✨\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        -144
+      ],
+      "id": "96bb540a-0c9d-41f1-9816-62dcebcb603e",
+      "name": "Gold mail",
+      "webhookId": "bda995a6-9b35-4d15-ae54-425817976f53",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7AeCCpgjJ7BDKUeI",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Email ID'] }}",
+        "subject": "Good Job! You’ve Earned the Silver Certificate",
+        "emailType": "text",
+        "message": "=Hello  {{ $json.Name }} ,  \n\n\nGreat effort! Based on your results,  \nyou are eligible for the **Silver Certificate**.  \nKeep pushing forward — Gold is just one step away! 🏅 \n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        416,
+        -48
+      ],
+      "id": "3917afee-ac05-4736-b212-d0d5d7b26643",
+      "name": "silver mail",
+      "webhookId": "bda995a6-9b35-4d15-ae54-425817976f53",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7AeCCpgjJ7BDKUeI",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Email ID'] }}",
+        "subject": "You’re Eligible for the Bronze Certificate",
+        "emailType": "text",
+        "message": "=Hello {{ $json.Name }}  ,  \nWell done! You’ve qualified for the **Bronze Certificate**.  \nKeep practicing and improving to reach Silver or Gold levels next time! 💪 \n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        528,
+        64
+      ],
+      "id": "7ca5165a-01c8-4c0c-b403-631f968fa5cf",
+      "name": "Bronze mail",
+      "webhookId": "02817ad8-472e-4d99-81f1-dfc7edb2a5bf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7AeCCpgjJ7BDKUeI",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Email ID'] }}",
+        "subject": "Update on Your Certificate Eligibility",
+        "emailType": "text",
+        "message": "=Hello  {{ $json.Name }}  ,  \nThank you for your participation.  \nCurrently, you are **not eligible** for a certificate.  \nTo qualify, complete all tasks, assignments, and quizzes,  \nand improve your marks based on the given criteria.  \nYou’ve got this — keep trying! 💫\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        528,
+        256
+      ],
+      "id": "1769b5d4-3bdd-46da-9408-e0e1c9403b52",
+      "name": "not eligible mail",
+      "webhookId": "7f165470-817a-4aba-a4ff-8c0229ace063",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7AeCCpgjJ7BDKUeI",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "10-t4NP-2ClbqSr4-OfzPrQGHogJu0FCtCHJWxPIeCm8",
+          "mode": "list",
+          "cachedResultName": "Certificate eligibility details",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10-t4NP-2ClbqSr4-OfzPrQGHogJu0FCtCHJWxPIeCm8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10-t4NP-2ClbqSr4-OfzPrQGHogJu0FCtCHJWxPIeCm8/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -48
+      ],
+      "id": "2014c129-e701-42a8-bb27-06ca5aa9adbc",
+      "name": "students details",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "b9QuChP3OyZ6utNB",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gold condition": {
+      "main": [
+        [
+          {
+            "node": "Gold mail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "silver condition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "silver condition": {
+      "main": [
+        [
+          {
+            "node": "silver mail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "bronze condition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bronze condition": {
+      "main": [
+        [
+          {
+            "node": "Bronze mail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "not eligible mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "students details": {
+      "main": [
+        [
+          {
+            "node": "Gold condition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "872145cc-c446-4a1b-aafe-6e1fda5a2b55",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4eba01caeb5b4eb6f6ca563f399f4ecc9162a65eb2ab80829efe809cf1413ffc"
+  },
+  "id": "2vaK7xtMigrQJuib",
+  "tags": []
+}

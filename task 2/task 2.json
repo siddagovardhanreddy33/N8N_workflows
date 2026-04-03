@@ -1,0 +1,456 @@
+{
+  "name": "My workflow 4",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1QdIIUJEsfU-hE67nJnGaeh9hZ0uy_wNO9zz9l6a0QwU",
+          "mode": "list",
+          "cachedResultName": "certification(Responses)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QdIIUJEsfU-hE67nJnGaeh9hZ0uy_wNO9zz9l6a0QwU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1031138640,
+          "mode": "list",
+          "cachedResultName": "Form Responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QdIIUJEsfU-hE67nJnGaeh9hZ0uy_wNO9zz9l6a0QwU/edit#gid=1031138640"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        352
+      ],
+      "id": "cade8bcc-1dc3-48b0-988f-5caba67b978d",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "TmbDdbNfinws3Xdu",
+          "name": "Google Sheets Trigger account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json['email id'] }}",
+        "subject": "Congratulations! Gold Certification Awarded",
+        "emailType": "text",
+        "message": "=Dear {{ $('Google Sheets Trigger').item.json.Name }},\n\nCongratulations! You have successfully earned the Gold Certification.\n\nYour outstanding performance:\n- Monthly Assessment: {{ $('Google Sheets Trigger').item.json[\"monthly assesment marks(out of 100)\"] }}/100\n- Quiz Marks: {{ $('Google Sheets Trigger').item.json[\"quiz marks (out of 100)\"] }}/100\n- Tasks Completed: {{ $('Google Sheets Trigger').item.json[\"total task completed (out of 10)\"] }}/10\n- Assessments Completed: {{ $('Google Sheets Trigger').item.json[\"total assessment completed (out of 10)\"] }}/10\n- Project Presentation: Completed\n\nWell done!\n\nBest regards,\nCertification Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        -32
+      ],
+      "id": "ee8da7bb-0f3a-4865-ac76-14b45dd3d0e4",
+      "name": "Send a message",
+      "webhookId": "ebed0275-6ab9-4706-b2e0-acb3ccbe71c5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "spAJbg1BgO7iE7Sy",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json['email id'] }}",
+        "subject": "Congratulations! Silver Certification Awarded",
+        "emailType": "text",
+        "message": "=Dear {{ $('Google Sheets Trigger').item.json.Name }},\n\nCongratulations! You have successfully earned the Silver Certification.\n\nYour performance:\n- Monthly Assessment: {{ $('Google Sheets Trigger').item.json[\"monthly assesment marks(out of 100)\"] }}/100\n- Quiz Marks: {{ $('Google Sheets Trigger').item.json[\"quiz marks (out of 100)\"] }}/100\n- Tasks Completed: {{ $('Google Sheets Trigger').item.json[\"total task completed (out of 10)\"] }}/10\n- Assessments Completed: {{ $('Google Sheets Trigger').item.json[\"total assessment completed (out of 10)\"] }}/10\n- Project Presentation: Completed\n\nGreat work!\n\nBest regards,\nCertification Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        224,
+        240
+      ],
+      "id": "a4e3dba8-a9a9-41d1-bc73-587d14e3e5eb",
+      "name": "Send a message1",
+      "webhookId": "64f23b56-802f-4245-abcc-926f9b770b13",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "spAJbg1BgO7iE7Sy",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json['monthly assesment marks(out of 100)'] }}",
+                    "rightValue": 80,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    },
+                    "id": "66d2f14b-5c88-4e8d-a485-861978e4c633"
+                  },
+                  {
+                    "leftValue": "={{ $json['total task completed (out of 10)'] }}",
+                    "rightValue": 10,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "id": "fa1c7c91-e419-4b8b-9be0-842b053ce881"
+                  },
+                  {
+                    "leftValue": "={{ $json['total assessment completed (out of 10)'] }}",
+                    "rightValue": 10,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "id": "35a088dd-f9b9-4ba3-82d3-8b8d14d3e031"
+                  },
+                  {
+                    "leftValue": "={{ $json['quiz marks (out of 100)'] }}",
+                    "rightValue": 80,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    },
+                    "id": "72482d9b-d0a2-4273-9c94-55cdcb310631"
+                  },
+                  {
+                    "leftValue": "={{ $json['project presentation completed'] }}",
+                    "rightValue": "yes",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "16860fc2-1a26-44e3-921e-2401af4fda2a"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Gold"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json['monthly assesment marks(out of 100)'] }}",
+                    "rightValue": 60,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "5345439d-a9d7-4e61-ad82-b61a6d7ec68f"
+                  },
+                  {
+                    "leftValue": "={{ $json['monthly assesment marks(out of 100)'] }}",
+                    "rightValue": 80,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lte"
+                    },
+                    "id": "84626213-1189-488e-809c-8c8ae32bc89e"
+                  },
+                  {
+                    "leftValue": "={{ $json['total task completed (out of 10)'] }}",
+                    "rightValue": 10,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "id": "629f2642-215c-40e1-a97a-a451f38dde1a"
+                  },
+                  {
+                    "leftValue": "={{ $json['total assessment completed (out of 10)'] }}",
+                    "rightValue": 10,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "id": "fc59d4f7-55d4-4615-91d7-b2dd8490f455"
+                  },
+                  {
+                    "leftValue": "={{ $json['quiz marks (out of 100)'] }}",
+                    "rightValue": 60,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "cce163b3-b77b-4d68-a1e0-24dbc37585aa"
+                  },
+                  {
+                    "leftValue": "={{ $json['quiz marks (out of 100)'] }}",
+                    "rightValue": 80,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lte"
+                    },
+                    "id": "10a0bf6c-6cbb-4d33-9da0-c4cb45f6524c"
+                  },
+                  {
+                    "leftValue": "={{ $json['project presentation completed'] }}",
+                    "rightValue": "yes",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "92a2a9f8-e9cd-4eb8-91cf-bc37fb4ce090"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Silver"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json['monthly assesment marks(out of 100)'] }}",
+                    "rightValue": 40,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "82b61c30-a3a6-4e09-b469-e93e86d86bff"
+                  },
+                  {
+                    "leftValue": "={{ $json['monthly assesment marks(out of 100)'] }}",
+                    "rightValue": 60,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    },
+                    "id": "66d1a7ba-128e-444a-a4fc-cf7217e56701"
+                  },
+                  {
+                    "leftValue": "={{ $json['total task completed (out of 10)'] }}",
+                    "rightValue": 10,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "id": "ebd89a88-5b9c-4a0f-b32d-4769a2c2ced0"
+                  },
+                  {
+                    "leftValue": "={{ $json['total assessment completed (out of 10)'] }}",
+                    "rightValue": 10,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "id": "abd41ed5-cac5-4b97-b65d-dd59a1de7e84"
+                  },
+                  {
+                    "leftValue": "={{ $json['quiz marks (out of 100)'] }}",
+                    "rightValue": 40,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "2e757168-613a-4b52-ae87-bb633f8e171c"
+                  },
+                  {
+                    "leftValue": "={{ $json['quiz marks (out of 100)'] }}",
+                    "rightValue": 60,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    },
+                    "id": "018a71e7-8270-491d-88f8-5c49f1ff06ca"
+                  },
+                  {
+                    "leftValue": "={{ $json['project presentation completed'] }}",
+                    "rightValue": "yes",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "73366e66-81e6-4749-bf6b-7b83289f4462"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Bronze"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "4f465abe-1b8c-44c2-9638-b46a9ec86101",
+                    "leftValue": "={{ $json['monthly assesment marks(out of 100)'] }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "number",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "not eligible"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -336,
+        320
+      ],
+      "id": "b412113f-cdcb-4d3d-a36d-8e047fc37531",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json['email id'] }}",
+        "subject": "Congratulations! Bronze Certification Awarded",
+        "emailType": "text",
+        "message": "=Dear {{ $('Google Sheets Trigger').item.json.Name }},\n\nCongratulations! You have successfully earned the Bronze Certification.\n\nYour performance:\n- Monthly Assessment: {{ $('Google Sheets Trigger').item.json[\"monthly assesment marks(out of 100)\"] }}/100\n- Quiz Marks: {{ $('Google Sheets Trigger').item.json[\"quiz marks (out of 100)\"] }}/100\n- Tasks Completed: {{ $('Google Sheets Trigger').item.json[\"total task completed (out of 10)\"] }}/10\n- Assessments Completed: {{ $('Google Sheets Trigger').item.json[\"total assessment completed (out of 10)\"] }}/10\n- Project Presentation: Completed\n\nKeep up the good work!\n\nBest regards,\nCertification Team",
+        "options": {}
+      },
+      "id": "834cf41e-41cb-4729-b511-8116db839386",
+      "name": "Send Bronze Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        128,
+        416
+      ],
+      "webhookId": "0adc9efd-bd2c-4754-a5d5-ba976274174e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cPVyLua9dpZomyx7",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json[\"email id\"] }}",
+        "subject": "certification",
+        "emailType": "text",
+        "message": "=hi  {{ $json.Name }}\n sorry your not elgible for certification\nthank you \ncoordinator",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        128,
+        704
+      ],
+      "id": "7976121e-d035-4a5d-a9e1-a0b5013550f5",
+      "name": "Send a message2",
+      "webhookId": "77a75820-50a1-4c93-b600-f03c33322a0d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "spAJbg1BgO7iE7Sy",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Bronze Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7eeee671-0174-4f71-a8f1-f7b8e8228657",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1005a295626bf9fd5a5ce74ca47f3b4f59830b60af064c8fd70ef011d29ea11a"
+  },
+  "id": "LkfgkpTAK7wAWiun",
+  "tags": []
+}

@@ -1,0 +1,552 @@
+{
+  "name": "AI Assignment Evaluator - Complete",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        250
+      ],
+      "parameters": {
+        "updateType": "message",
+        "options": {}
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram API"
+        }
+      }
+    },
+    {
+      "id": "2",
+      "name": "Telegram Get File",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        450,
+        250
+      ],
+      "parameters": {
+        "operation": "getFile",
+        "fileId": "={{ $json[\"message\"][\"document\"][\"file_id\"] || $json[\"message\"][\"document\"][\"file_id\"] }}",
+        "download": true,
+        "binaryPropertyName": "file"
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram API"
+        }
+      }
+    },
+    {
+      "id": "3",
+      "name": "Detect Type",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        650,
+        250
+      ],
+      "parameters": {
+        "functionCode": "// Determine file type and add metadata\nconst fileName = $binary && $binary.file && $binary.file.fileName ? $binary.file.fileName : ($json.message && $json.message.document && $json.message.document.file_name ? $json.message.document.file_name : 'uploaded');\nconst lower = fileName.toLowerCase();\nconst isZip = lower.endsWith('.zip');\nconst isPdf = lower.endsWith('.pdf');\n\nreturn [{\n  json: {\n    fileName,\n    isZip,\n    isPdf,\n    telegramChatId: $json.message && $json.message.chat ? $json.message.chat.id : ($json.message && $json.message.from ? $json.message.from.id : null),\n    telegramUsername: $json.message && $json.message.from ? $json.message.from.username : null,\n  },\n  binary: $binary\n}];"
+      }
+    },
+    {
+      "id": "4",
+      "name": "Extract ZIP (Execute Command)",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        850,
+        180
+      ],
+      "parameters": {
+        "command": "bash",
+        "args": [
+          "-lc",
+          "set -euo pipefail; mkdir -p /tmp/n8n_extract; cd /tmp/n8n_extract; cat > uploaded.zip && unzip -o uploaded.zip -d extracted || true; echo '{\"extracted_dir\":\"/tmp/n8n_extract/extracted\"}'"
+        ],
+        "input": "={{ $binary.file.data }}",
+        "workingDirectory": ""
+      }
+    },
+    {
+      "id": "5",
+      "name": "List Extracted Files (Function)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        180
+      ],
+      "parameters": {
+        "functionCode": "// This node expects the Extract ZIP step to write files to /tmp/n8n_extract/extracted\nconst fs = require('fs');\nconst path = '/tmp/n8n_extract/extracted';\nlet out = [];\nfunction walk(dir) {\n  const items = fs.readdirSync(dir);\n  for (const it of items) {\n    const p = dir + '/' + it;\n    const stat = fs.statSync(p);\n    if (stat.isDirectory()) walk(p);\n    else {\n      const data = fs.readFileSync(p);\n      out.push({\n        json: { fileName: it, path: p },\n        binary: { file: { data: data.toString('base64'), fileName: it, mimeType: '' } }\n      });\n    }\n  }\n}\nif (fs.existsSync(path)) walk(path);\nreturn out;"
+      }
+    },
+    {
+      "id": "6",
+      "name": "Split Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        1250,
+        180
+      ],
+      "parameters": {
+        "batchSize": 1
+      }
+    },
+    {
+      "id": "7",
+      "name": "IF - Is PDF?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1450,
+        180
+      ],
+      "parameters": {
+        "conditions": {
+          "boolean": [],
+          "number": [],
+          "string": [
+            {
+              "value1": "={{ $binary && $binary.file ? $binary.file.fileName.toLowerCase().endsWith('.pdf') : $json.isPdf }}",
+              "operation": "equal",
+              "value2": "true"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "8",
+      "name": "HTTP Request - PDF Extractor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1650,
+        120
+      ],
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "http://pdf-extractor:5000/extract_text",
+        "options": {},
+        "bodyContentType": "form-data",
+        "formData": [
+          {
+            "name": "file",
+            "value": "={{$binary.file.data}}",
+            "type": "file"
+          }
+        ]
+      }
+    },
+    {
+      "id": "9",
+      "name": "Normalize Text & Meta",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1850,
+        120
+      ],
+      "parameters": {
+        "functionCode": "const text = $json.text || ($json.body && $json.body.text) || '';\n// Try to extract name patterns\nlet studentName = $json.fileName ? $json.fileName.replace(/\\.[^/.]+$/, '') : 'Unknown';\nconst m = text.match(/(?:Name|Student)[:\\-\\s]*([A-Z][a-z]+(?:\\s[A-Z][a-z]+)*)/i);\nif (m) studentName = m[1].trim();\nreturn [{ json: { text, studentName, fileName: $json.fileName } }];"
+      }
+    },
+    {
+      "id": "10",
+      "name": "OpenAI - Parse Q/A",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        2050,
+        120
+      ],
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a robust parser for student assignment PDFs. The input is raw text extracted from a student's assignment PDF. Split the content into a JSON array of question-answer pairs. Output ONLY JSON exactly in this format:\\n[ {\\n  \"question_id\": \"Q1\",\\n  \"question\": \"<question text>\",\\n  \"answer\": \"<student answer text>\",\\n  \"page\": null\\n} ]\\nRules:\\n- If the PDF contains multiple questions, produce one object per question.\\n- If a question spans lines, keep full text.\\n- If there is no clear answer for a question, set \\\"answer\\\" to empty string.\\n- Try to infer question numbering from text headings like Q1, Question 1, etc.\\n- Do not output anything other than the JSON array."
+          },
+          {
+            "role": "user",
+            "content": "Here is the extracted text:\\n---\\n{{$json[\"text\"]}}\\n---\\nReturn only the JSON array."
+          }
+        ],
+        "temperature": 0,
+        "maxTokens": 1500
+      },
+      "credentials": {
+        "openAIApi": {
+          "id": "OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "id": "11",
+      "name": "Parse JSON Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        2250,
+        120
+      ],
+      "parameters": {
+        "functionCode": "// Parse model response and return one item per Q/A\nconst content = $json.choices ? $json.choices[0].message.content : ($json.body && $json.body.choices && $json.body.choices[0] && $json.body.choices[0].message && $json.body.choices[0].message.content ? $json.body.choices[0].message.content : $json.content || '');\nlet arr = [];\ntry {\n  arr = JSON.parse(content);\n} catch(e) {\n  const m = content.match(/(\\[.*\\])/s);\n  if (m) arr = JSON.parse(m[1]);\n}\nif (!Array.isArray(arr)) arr = [];\n\nconst out = arr.map(q => ({\n  json: {\n    studentName: $json.studentName || $json.fileName,\n    fileName: $json.fileName,\n    question_id: q.question_id || null,\n    question: q.question || '',\n    answer: q.answer || '',\n    page: q.page || null\n  }\n}));\nreturn out;"
+      }
+    },
+    {
+      "id": "12",
+      "name": "Group Q/A per Assignment (Function)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        2450,
+        120
+      ],
+      "parameters": {
+        "functionCode": "// This node assumes all Q/A items for a single PDF are in this execution\nconst itemsArr = items;\nconst groups = {};\nfor (const it of itemsArr) {\n  const key = it.json.fileName || it.json.studentName || 'unknown';\n  if (!groups[key]) groups[key] = { studentName: it.json.studentName, fileName: key, questions: [] };\n  groups[key].questions.push({\n    question_id: it.json.question_id,\n    question: it.json.question,\n    answer: it.json.answer,\n    page: it.json.page\n  });\n}\nconst out = Object.values(groups).map(g => ({ json: g }));\nreturn out;"
+      }
+    },
+    {
+      "id": "13",
+      "name": "OpenAI - Evaluate Assignment",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        2650,
+        120
+      ],
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are an expert grader for Python programming assignments. For each question and given student answer, return JSON array with objects: {\"question_id\": \"Q1\", \"score\": <0-10>, \"feedback\": \"...\"}. Return ONLY JSON."
+          },
+          {
+            "role": "user",
+            "content": "Here is the student and their Q/A array:\\nStudent: {{$json.studentName}}\\nFile: {{$json.fileName}}\\nQuestions: {{$json.questions}}\\n\\nFor each question produce: question_id, score (integer 0-10), feedback (1-2 sentences). Also include an overall_summary and total_score. Return a single JSON object: {\"results\": [...], \"total_score\": 76, \"overall_summary\": \"...\" }"
+          }
+        ],
+        "temperature": 0,
+        "maxTokens": 1500
+      },
+      "credentials": {
+        "openAIApi": {
+          "id": "OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "id": "14",
+      "name": "Merge Evaluations (Function)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        2850,
+        120
+      ],
+      "parameters": {
+        "functionCode": "// Parse grader response, merge with questions to create final report\nconst resp = $json.choices ? $json.choices[0].message.content : ($json.body && $json.body.choices ? $json.body.choices[0].message.content : $json.content || '');\nlet parsed = {};\ntry { parsed = JSON.parse(resp); } catch(e) {\n  const m = resp.match(/(\\{.*\\})/s);\n  parsed = m ? JSON.parse(m[1]) : {};\n}\nconst results = parsed.results || [];\nconst questions = $json.questions || [];\nconst merged = questions.map(q => {\n  const r = results.find(x => x.question_id == q.question_id) || {};\n  return {\n    question_id: q.question_id,\n    question: q.question,\n    answer: q.answer,\n    score: r.score || 0,\n    feedback: r.feedback || ''\n  };\n});\nconst total = parsed.total_score || merged.reduce((s,i)=>s+(i.score||0),0);\nconst overall = parsed.overall_summary || (total/ (merged.length*10) >= 0.8 ? 'Good understanding' : 'Needs improvement');\n\nreturn [{ json: {\n  studentName: $json.studentName,\n  fileName: $json.fileName,\n  questions: merged,\n  total,\n  maxScore: merged.length * 10,\n  overall\n}}];"
+      }
+    },
+    {
+      "id": "15",
+      "name": "Create HTML Report (Function)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        3050,
+        120
+      ],
+      "parameters": {
+        "functionCode": "const r = $json;\nconst html = `\n<!doctype html>\n<html>\n<head><meta charset=\"utf-8\"><title>Report - ${r.studentName}</title></head>\n<body>\n  <h1>Assignment Evaluation Report</h1>\n  <p><strong>Student:</strong> ${r.studentName}</p>\n  <p><strong>File:</strong> ${r.fileName}</p>\n  <p><strong>Total Score:</strong> ${r.total} / ${r.maxScore}</p>\n  <p><strong>Overall Feedback:</strong> ${r.overall}</p>\n  <hr/>\n  ${r.questions.map((q, idx) => `\n    <h3>Q${idx+1}. ${q.question_id || ''} ${q.question}</h3>\n    <pre>Answer: ${q.answer}</pre>\n    <p><b>Score:</b> ${q.score} / 10</p>\n    <p><b>Feedback:</b> ${q.feedback}</p>\n    <hr/>\n  `).join('')}\n</body>\n</html>\n`;\nreturn [{ json: { studentName: r.studentName, fileName: r.fileName }, binary: { reportHtml: Buffer.from(html).toString('base64') } }];"
+      }
+    },
+    {
+      "id": "16",
+      "name": "HTML to PDF",
+      "type": "n8n-nodes-base.htmlToPdf",
+      "typeVersion": 1,
+      "position": [
+        3250,
+        120
+      ],
+      "parameters": {
+        "binaryPropertyName": "reportHtml",
+        "fileName": "={{ $json.studentName + '_report.pdf' }}"
+      }
+    },
+    {
+      "id": "17",
+      "name": "Telegram Send Document",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        3450,
+        120
+      ],
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $json.telegramChatId || $json.studentChatId || $json.chatId }}",
+        "document": "={{ $binary.reportPdf }}",
+        "fileName": "={{ $json.studentName + '_report.pdf' }}",
+        "caption": "Assignment evaluation result: {{$json.total}} / {{$json.maxScore}}"
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram API"
+        }
+      }
+    },
+    {
+      "id": "18",
+      "name": "Workflow Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        450
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "19",
+      "name": "On Error - Notify Admin (Telegram)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        450,
+        450
+      ],
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "ADMIN_CHAT_ID",
+        "text": "An error occurred in Assignment Evaluator workflow: {{$json[\"error\"]}}"
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Telegram Get File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Get File": {
+      "main": [
+        [
+          {
+            "node": "Detect Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect Type": {
+      "main": [
+        [
+          {
+            "node": "IF - Is PDF?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract ZIP (Execute Command)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract ZIP (Execute Command)": {
+      "main": [
+        [
+          {
+            "node": "List Extracted Files (Function)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Extracted Files (Function)": {
+      "main": [
+        [
+          {
+            "node": "Split Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Items": {
+      "main": [
+        [
+          {
+            "node": "IF - Is PDF?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Is PDF?": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - PDF Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split Items",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "HTTP Request - PDF Extractor": {
+      "main": [
+        [
+          {
+            "node": "Normalize Text & Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Text & Meta": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Parse Q/A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Parse Q/A": {
+      "main": [
+        [
+          {
+            "node": "Parse JSON Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse JSON Response": {
+      "main": [
+        [
+          {
+            "node": "Group Q/A per Assignment (Function)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Group Q/A per Assignment (Function)": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Evaluate Assignment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Evaluate Assignment": {
+      "main": [
+        [
+          {
+            "node": "Merge Evaluations (Function)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Evaluations (Function)": {
+      "main": [
+        [
+          {
+            "node": "Create HTML Report (Function)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create HTML Report (Function)": {
+      "main": [
+        [
+          {
+            "node": "HTML to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML to PDF": {
+      "main": [
+        [
+          {
+            "node": "Telegram Send Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "On Error - Notify Admin (Telegram)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {}
+}

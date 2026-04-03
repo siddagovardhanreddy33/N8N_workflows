@@ -1,0 +1,224 @@
+{
+  "name": "1st workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "calculator",
+        "formDescription": "this will collect 3 inputs from the user",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "var1",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "operator",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "var2",
+              "fieldType": "number",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Submit"
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        32
+      ],
+      "id": "f1e6bb40-6d6c-4c1d-886e-9646d3795644",
+      "name": "On form submission",
+      "webhookId": "5cb9dbc6-aa69-4ab0-927e-eeac460a99d2"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.operator }}",
+                    "rightValue": "+",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "78d54d75-124f-4aaf-92a0-31e14ac7698a"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "add"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "114bb0a2-689a-4690-ae71-027134299cfb",
+                    "leftValue": "={{ $json.operator }}",
+                    "rightValue": "-",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "sub"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "41f50921-c6f8-4214-b2e0-c5eb1c752dfc",
+                    "leftValue": "={{ $json.operator }}",
+                    "rightValue": "*",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "mul"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        208,
+        32
+      ],
+      "id": "1010fdb8-9f9a-44bf-ac73-6f16fc727442",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "\nreturn{\n  \"var1\":_items[0][\"json\"][\"var1\"],\n  \"opr\":_items[0][\"json\"][\"operator\"],\n  \"var2\":_items[0][\"json\"][\"var2\"],\n  \"output\":_items[0][\"json\"][\"var1\"]+_items[0][\"json\"][\"var2\"]\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -80
+      ],
+      "id": "4e57c04c-f6bb-46a1-91e1-e2fd991a58fb",
+      "name": "addition"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "\nreturn{\n  \"var1\":_items[0][\"json\"][\"var1\"],\n  \"opr\":_items[0][\"json\"][\"operator\"],\n  \"var2\":_items[0][\"json\"][\"var2\"],\n  \"output\":_items[0][\"json\"][\"var1\"]-_items[0][\"json\"][\"var2\"]\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        64
+      ],
+      "id": "7a8aedf6-be33-4f2f-8f32-3899c87e7545",
+      "name": "subtraction"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "\nreturn{\n  \"var1\":_items[0][\"json\"][\"var1\"],\n  \"opr\":_items[0][\"json\"][\"operator\"],\n  \"var2\":_items[0][\"json\"][\"var2\"],\n  \"output\":_items[0][\"json\"][\"var1\"]*_items[0][\"json\"][\"var2\"]\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        224
+      ],
+      "id": "3f7ff8df-35e2-4712-a38c-d1f77b0ef6a3",
+      "name": "multiplication"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "addition",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "subtraction",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "multiplication",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "37060e7f-13a9-40c5-93c4-e44f8c8ee5ae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4eba01caeb5b4eb6f6ca563f399f4ecc9162a65eb2ab80829efe809cf1413ffc"
+  },
+  "id": "hnBIpKvB8ERdoiaL",
+  "tags": []
+}
